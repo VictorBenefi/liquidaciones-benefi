@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment
 from datetime import datetime
 
@@ -21,17 +20,23 @@ if not st.session_state.logueado:
     clave = st.text_input("Contraseña", type="password")
 
     if st.button("Ingresar"):
-    if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
-        st.session_state.logueado = True
-        st.session_state.usuario = usuario
-        st.experimental_rerun()
-    else:
-        st.error("Usuario o contraseña incorrectos")
-    st.stop()  # ⛔️ Detener ejecución si no está logueado
+        if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
+            st.session_state.logueado = True
+            st.session_state.usuario = usuario
+            st.experimental_rerun()
+        else:
+            st.error("Usuario o contraseña incorrectos")
+    st.stop()
 
 # --- APLICACIÓN PRINCIPAL ---
 st.success(f"Bienvenido {st.session_state.usuario} 👋")
 st.title("💰 Sistema de Liquidaciones con IVA - Benefi")
+
+# Botón de cierre de sesión
+if st.button("Cerrar sesión 🔒"):
+    st.session_state.logueado = False
+    st.session_state.usuario = ""
+    st.experimental_rerun()
 
 archivo = st.file_uploader("📁 Subí el archivo Excel", type=["xlsx"])
 
