@@ -21,11 +21,12 @@ if not st.session_state.logueado:
     clave = st.text_input("Contraseña", type="password")
 
     if st.button("Ingresar"):
-        if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
-            st.session_state.logueado = True
-            st.session_state.usuario = usuario
-        else:
-            st.error("Usuario o contraseña incorrectos")
+    if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
+        st.session_state.logueado = True
+        st.session_state.usuario = usuario
+        st.experimental_rerun()
+    else:
+        st.error("Usuario o contraseña incorrectos")
     st.stop()  # ⛔️ Detener ejecución si no está logueado
 
 # --- APLICACIÓN PRINCIPAL ---
