@@ -1,4 +1,37 @@
 import streamlit as st
+
+# Lista de usuarios y contraseñas permitidos (podés editar o ampliar)
+USUARIOS_AUTORIZADOS = {
+    "admin": "clave123",
+    "victor": "benefi2024",
+    # Agregá más usuarios si querés
+}
+
+# Inicializar sesión
+if "logueado" not in st.session_state:
+    st.session_state.logueado = False
+
+# Si no está logueado, mostrar formulario
+if not st.session_state.logueado:
+    st.title("🔒 Ingreso a BENEFI")
+
+    usuario = st.text_input("Usuario")
+    clave = st.text_input("Contraseña", type="password")
+
+    if st.button("Ingresar"):
+        if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
+            st.session_state.logueado = True
+            st.experimental_rerun()
+        else:
+            st.error("Usuario o contraseña incorrectos")
+
+# Si está logueado, mostrar el resto de la app
+if st.session_state.logueado:
+    st.success(f"Bienvenido {usuario} 👋")
+    # 🔽 Acá abajo empieza tu app como siempre
+
+
+import streamlit as st
 import pandas as pd
 from io import BytesIO
 from openpyxl import load_workbook
