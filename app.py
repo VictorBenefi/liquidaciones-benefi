@@ -54,4 +54,4 @@ if archivo:
         df["Costo_Transaccion"] = df["Cantidad_Ventas"] * df["Costo_Tr"]
         df["Subtotal"] = df["Costo_Admin"] + df["Costo_Transaccion"]
         df["IVA_21%"] = df["Subtotal"] * 0.21
-        df["Total_Cobrar_]()
+        df["Total_Cobrar"] = df["Subtotal"] + df["IVA_21%"]
