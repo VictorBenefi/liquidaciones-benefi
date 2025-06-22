@@ -28,9 +28,7 @@ if not st.session_state.logueado:
             st.session_state.usuario = usuario
         else:
             st.error("Usuario o contraseña incorrectos")
-
-    if not st.session_state.logueado:
-        st.stop()
+    st.stop()
 
 # --- APLICACIÓN PRINCIPAL ---
 st.success(f"Bienvenido {st.session_state.usuario} 👋")
