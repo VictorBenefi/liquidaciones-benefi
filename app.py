@@ -22,12 +22,13 @@ if not st.session_state.logueado:
         clave = st.text_input("Contraseña", type="password")
         enviar = st.form_submit_button("Ingresar")
 
-    if enviar:
-        if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
-            st.session_state.logueado = True
-            st.session_state.usuario = usuario
-        else:
-            st.error("Usuario o contraseña incorrectos")
+   if enviar:
+    if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
+        st.session_state.logueado = True
+        st.session_state.usuario = usuario
+        st.experimental_rerun()  # 👈 Fuerza recarga tras login exitoso
+    else:
+        st.error("Usuario o contraseña incorrectos")
 
     st.stop()
 
