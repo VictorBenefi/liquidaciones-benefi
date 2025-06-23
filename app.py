@@ -1,53 +1,52 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
+from openpyxl import load_workbook
 from openpyxl.styles import Font, Alignment
 from datetime import datetime
 
 # --- LOGIN ---
+
 USUARIOS_AUTORIZADOS = {
     "admin": "clave123",
     "victor": "benefi2024",
 }
 
+# Inicializar estados de sesión
 if "logueado" not in st.session_state:
     st.session_state.logueado = False
-    st.session_state.usuario = ""
+if "error_login" not in st.session_state:
+    st.session_state.error_login = False
 
+# Función para validar usuario
+def autenticar():
+    user = st.session_state["usuario"]
+    password = st.session_state["clave"]
+    if user in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[user] == password:
+        st.session_state.logueado = True
+        st.session_state.error_login = False
+    else:
+        st.session_state.error_login = True
+
+# Mostrar login si no está logueado
 if not st.session_state.logueado:
     st.title("🔒 Ingreso a BENEFI")
-
     with st.form("login_form"):
-        usuario = st.text_input("Usuario")
-        clave = st.text_input("Contraseña", type="password")
-        enviar = st.form_submit_button("Ingresar")
-
-    if enviar:
-        if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
-            st.session_state.logueado = True
-            st.session_state.usuario = usuario
-            st.experimental_rerun()  # 🔁 Redibuja desde cero
-        else:
-            st.error("Usuario o contraseña incorrectos")
-
-    st.stop()  # 🔒 Detiene la app si no está logueado
+        st.text_input("Usuario", key="usuario")
+        st.text_input("Contraseña", type="password", key="clave")
+        st.form_submit_button("Ingresar", on_click=autenticar)
+    if st.session_state.error_login:
+        st.error("Usuario o contraseña incorrectos")
+    st.stop()
 
 # --- APP PRINCIPAL ---
-st.success(f"Bienvenido {st.session_state.usuario} 👋")
-st.title("💰 Sistema de Liquidaciones con IVA - Benefi")
 
-# Botón de cierre de sesión
-if st.button("Cerrar sesión 🔒"):
-    st.session_state.logueado = False
-    st.session_state.usuario = ""
-    st.info("Sesión cerrada. Recargá la página para volver al login.")
-    st.stop()
+st.title("💰 Sistema de Liquidaciones con IVA - Benefi")
 
 archivo = st.file_uploader("📁 Subí el archivo Excel", type=["xlsx"])
 
 if archivo:
     df = pd.read_excel(archivo)
-
     columnas_necesarias = {"red", "Total_Ventas", "Cantidad_Ventas", "Costo_Amin", "Costo_Tr"}
 
     if columnas_necesarias.issubset(df.columns):
@@ -90,9 +89,8 @@ if archivo:
         st.download_button(
             label="📥 Descargar Excel con encabezado y formato",
             data=salida.getvalue(),
-            file_name="Cobrar_liquidacion_junio.xlsx",
+            file_name="Cobrar_liquidacion.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-
     else:
         st.error("❗ El archivo debe tener las columnas: red, Total_Ventas, Cantidad_Ventas, Costo_Amin, Costo_Tr")
