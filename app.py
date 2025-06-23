@@ -26,21 +26,17 @@ if not st.session_state.logueado:
         if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
             st.session_state.logueado = True
             st.session_state.usuario = usuario
-            st.success("✅ Ingreso exitoso. Esperá un segundo...")
+            st.experimental_rerun()  # 🔁 Redibuja desde cero
         else:
             st.error("Usuario o contraseña incorrectos")
 
-    # Si aún no está logueado, detenemos la app
-    if not st.session_state.logueado:
-        st.stop()
-
-
+    st.stop()  # 🔒 Detiene la app si no está logueado
 
 # --- APP PRINCIPAL ---
 st.success(f"Bienvenido {st.session_state.usuario} 👋")
 st.title("💰 Sistema de Liquidaciones con IVA - Benefi")
 
-# Botón de cierre de sesión (sin rerun)
+# Botón de cierre de sesión
 if st.button("Cerrar sesión 🔒"):
     st.session_state.logueado = False
     st.session_state.usuario = ""
