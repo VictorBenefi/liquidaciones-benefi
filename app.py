@@ -26,11 +26,13 @@ if not st.session_state.logueado:
         if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
             st.session_state.logueado = True
             st.session_state.usuario = usuario
-            st.experimental_rerun()  # 👈 redibuja la app desde cero
+            st.success("✅ Ingreso exitoso. Esperá un segundo...")
         else:
             st.error("Usuario o contraseña incorrectos")
 
-    st.stop()
+    # Si aún no está logueado, detenemos la app
+    if not st.session_state.logueado:
+        st.stop()
 
 # --- APP PRINCIPAL ---
 st.success(f"Bienvenido {st.session_state.usuario} 👋")
