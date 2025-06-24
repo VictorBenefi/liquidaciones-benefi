@@ -98,3 +98,36 @@ if archivo:
 
     else:
         st.error("❗ El archivo debe tener las columnas: red, Total_Ventas, Cantidad_Ventas, Costo_Amin, Costo_Tr")
+import os
+
+st.markdown("---")
+st.header("📁 Historial de Liquidaciones")
+
+# Crear carpeta 'historial' si no existe
+HISTORIAL_DIR = "historial"
+os.makedirs(HISTORIAL_DIR, exist_ok=True)
+
+# Listar archivos del historial
+archivos = sorted([f for f in os.listdir(HISTORIAL_DIR) if f.endswith(".xlsx")], reverse=True)
+
+if archivos:
+    for archivo in archivos:
+        col1, col2, col3 = st.columns([4, 2, 1])
+        with col1:
+            st.write(f"📄 {archivo}")
+        with col2:
+            with open(os.path.join(HISTORIAL_DIR, archivo), "rb") as f:
+                st.download_button(
+                    label="📥 Descargar",
+                    data=f,
+                    file_name=archivo,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key=f"descarga_{archivo}"
+                )
+        with col3:
+            if st.button("🗑️ Eliminar", key=f"eliminar_{archivo}"):
+                os.remove(os.path.join(HISTORIAL_DIR, archivo))
+                st.success(f"Archivo eliminado: {archivo}")
+                st.experimental_rerun()
+else:
+    st.info("Todavía no se han generado liquidaciones.")
