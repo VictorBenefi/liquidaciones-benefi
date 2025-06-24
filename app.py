@@ -3,6 +3,8 @@ import pandas as pd
 from io import BytesIO
 from openpyxl.styles import Font, Alignment
 from datetime import datetime
+from pathlib import Path
+import os
 
 # --- LOGIN ---
 USUARIOS_AUTORIZADOS = {
@@ -26,19 +28,17 @@ if not st.session_state.logueado:
         if usuario in USUARIOS_AUTORIZADOS and USUARIOS_AUTORIZADOS[usuario] == clave:
             st.session_state.logueado = True
             st.session_state.usuario = usuario
-            st.success("✅ Ingreso exitoso. Esperá un segundo...")
+            st.experimental_rerun()
         else:
             st.error("Usuario o contraseña incorrectos")
 
-    # Si aún no está logueado, detenemos la app
-    if not st.session_state.logueado:
-        st.stop()
+    st.stop()
 
 # --- APP PRINCIPAL ---
 st.success(f"Bienvenido {st.session_state.usuario} 👋")
 st.title("💰 Sistema de Liquidaciones con IVA - Benefi")
 
-# Botón de cierre de sesión (sin rerun)
+# Botón de cierre de sesión
 if st.button("Cerrar sesión 🔒"):
     st.session_state.logueado = False
     st.session_state.usuario = ""
@@ -66,6 +66,16 @@ if archivo:
         nombre_mes = hoy.strftime('%B').capitalize()
         fecha_str = hoy.strftime('%d de %B de %Y').capitalize()
 
+        # Crear carpeta historial si no existe
+        Path("historial").mkdir(exist_ok=True)
+
+        # Nombre del archivo con fecha y usuario
+        fecha_archivo = hoy.strftime("%Y-%m-%d")
+        nombre_usuario = st.session_state.usuario
+        nombre_archivo = f"liquidacion_{nombre_usuario}_{fecha_archivo}.xlsx"
+        ruta_archivo = os.path.join("historial", nombre_archivo)
+
+        # Guardar Excel en BytesIO y en disco
         salida = BytesIO()
         with pd.ExcelWriter(salida, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Liquidación", startrow=3)
@@ -89,12 +99,31 @@ if archivo:
                     for celda in col[1:]:
                         celda.number_format = '"$"#,##0.00'
 
+        with open(ruta_archivo, "wb") as f:
+            f.write(salida.getvalue())
+
         st.download_button(
             label="📥 Descargar Excel con encabezado y formato",
             data=salida.getvalue(),
-            file_name="Cobrar_liquidacion_junio.xlsx",
+            file_name=nombre_archivo,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
     else:
         st.error("❗ El archivo debe tener las columnas: red, Total_Ventas, Cantidad_Ventas, Costo_Amin, Costo_Tr")
+
+# --- HISTORIAL ---
+st.subheader("📚 Historial de archivos generados")
+
+if Path("historial").exists():
+    archivos = sorted(os.listdir("historial"), reverse=True)
+    for archivo in archivos:
+        if archivo.endswith(".xlsx"):
+            ruta = os.path.join("historial", archivo)
+            with open(ruta, "rb") as f:
+                st.download_button(
+                    label=f"📄 Descargar {archivo}",
+                    data=f.read(),
+                    file_name=archivo,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
