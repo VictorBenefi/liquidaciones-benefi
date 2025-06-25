@@ -65,10 +65,6 @@ if archivo:
         nombre_mes = hoy.strftime('%B').capitalize()
         fecha_str = hoy.strftime('%d de %B de %Y').capitalize()
 
-        columnas_monedas = ["Costo_Admin", "Costo_Transaccion", "Subtotal", "IVA_21%", "Total_Cobrar"]
-        for col in columnas_monedas:
-            df[col] = df[col].map(lambda x: f"${x:.2f}".replace(",", ""))
-
         salida = BytesIO()
         with pd.ExcelWriter(salida, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Liquidación", startrow=3)
@@ -86,21 +82,36 @@ if archivo:
             celda2.font = Font(size=11, italic=True)
             celda2.alignment = Alignment(horizontal="center")
 
+            columnas_monedas = ["Costo_Admin", "Costo_Transaccion", "Subtotal", "IVA_21%", "Total_Cobrar"]
+            for col in hoja.iter_cols(min_row=4, max_row=hoja.max_row):
+                if col[0].value in columnas_monedas:
+                    for celda in col[1:]:
+                        celda.number_format = '"$"# ##0,00'  # Coma como separador decimal y sin puntos
+
+        nombre_archivo = f"Cobrar_liquidacion_{nombre_mes.lower()}.xlsx"
+
+        # Guardar en carpeta historial
+        HISTORIAL_DIR = "historial"
+        os.makedirs(HISTORIAL_DIR, exist_ok=True)
+        with open(os.path.join(HISTORIAL_DIR, nombre_archivo), "wb") as f:
+            f.write(salida.getvalue())
+
         st.download_button(
             label="📥 Descargar Excel con encabezado y formato",
             data=salida.getvalue(),
-            file_name="Cobrar_liquidacion_junio.xlsx",
+            file_name=nombre_archivo,
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+
     else:
         st.error("❗ El archivo debe tener las columnas: red, Total_Ventas, Cantidad_Ventas, Costo_Amin, Costo_Tr")
 
+# --- HISTORIAL ---
 st.markdown("---")
 st.header("📁 Historial de Liquidaciones")
 
 HISTORIAL_DIR = "historial"
 os.makedirs(HISTORIAL_DIR, exist_ok=True)
-
 archivos = sorted([f for f in os.listdir(HISTORIAL_DIR) if f.endswith(".xlsx")], reverse=True)
 
 if archivos:
