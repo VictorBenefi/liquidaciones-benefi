@@ -83,7 +83,7 @@ if st.session_state.logueado:
                 for col in hoja.iter_cols(min_row=4, max_row=hoja.max_row):
                     if col[0].value in columnas_monedas:
                         for celda in col[1:]:
-                            celda.number_format = '"$"#,##0.00'
+                           celda.number_format = '"$"#0.00'
 
             # Botón de descarga
             st.download_button(
