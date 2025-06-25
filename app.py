@@ -86,32 +86,24 @@ if archivo:
             for col in hoja.iter_cols(min_row=4, max_row=hoja.max_row):
                 if col[0].value in columnas_monedas:
                     for celda in col[1:]:
-                        celda.number_format = '"$"# ##0,00'  # Coma como separador decimal y sin puntos
-
-        nombre_archivo = f"Cobrar_liquidacion_{nombre_mes.lower()}.xlsx"
-
-        # Guardar en carpeta historial
-        HISTORIAL_DIR = "historial"
-        os.makedirs(HISTORIAL_DIR, exist_ok=True)
-        with open(os.path.join(HISTORIAL_DIR, nombre_archivo), "wb") as f:
-            f.write(salida.getvalue())
+                        celda.number_format = '# ##0,00'
 
         st.download_button(
             label="📥 Descargar Excel con encabezado y formato",
             data=salida.getvalue(),
-            file_name=nombre_archivo,
+            file_name="Cobrar_liquidacion_junio.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
     else:
         st.error("❗ El archivo debe tener las columnas: red, Total_Ventas, Cantidad_Ventas, Costo_Amin, Costo_Tr")
 
-# --- HISTORIAL ---
 st.markdown("---")
 st.header("📁 Historial de Liquidaciones")
 
 HISTORIAL_DIR = "historial"
 os.makedirs(HISTORIAL_DIR, exist_ok=True)
+
 archivos = sorted([f for f in os.listdir(HISTORIAL_DIR) if f.endswith(".xlsx")], reverse=True)
 
 if archivos:
